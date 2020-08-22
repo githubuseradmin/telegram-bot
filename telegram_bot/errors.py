@@ -1,5 +1,5 @@
 from time import time
-from telegram_bot.sql import errors_db
+from telegram_bot.database import errors_db
 
 db = errors_db("db/errors.db")
 

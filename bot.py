@@ -2,11 +2,11 @@ import telegram_bot
 
 bot = telegram_bot.Bot("1124104867:AAHHe3f4Lxs8biGFTwtb16BXeE29rM6x_aU")
 
-users = telegram_bot.users(bot)
-commands = telegram_bot.commands(bot)
+users = telegram_bot.users()
+commands = telegram_bot.commands()
 settings = telegram_bot.settings()
 errors = telegram_bot.errors()
-callback_query = telegram_bot.callback_query(bot)
+callback_query = telegram_bot.callback_query()
 statistics = telegram_bot.statistics()
 
 update_id = None

@@ -1,4 +1,4 @@
-from telegram_bot.sql import settings_db
+from telegram_bot.database import settings_db
 
 db = settings_db("db/settings.db")
 

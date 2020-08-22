@@ -5,13 +5,16 @@ def main():
     pass
 
 class Bot():
-    def __init__(self, token, url = None):
-        self.token = token
+    token = None
+    def __init__(self, token = None, url = None):
+        if Bot.token is None:
+            if token:
+                Bot.token = token
         if url is None:
             self.url = "https://api.telegram.org/bot"
         else:
             self.url = url
-        self.request_url = self.url + self.token
+        self.request_url = self.url + Bot.token
 
     def getUpdates(self, offset = None, timeout = None):
         """

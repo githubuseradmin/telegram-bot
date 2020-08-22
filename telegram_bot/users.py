@@ -1,12 +1,12 @@
 from time import time, strftime
 from datetime import datetime
-from telegram_bot.sql import users_db
+from telegram_bot.database import users_db
 
 db = users_db("db/users.db")
 
+bot = telegram_bot.Bot()
+
 class users():
-    def __init__(self, bot = None):
-        self.bot = bot
     def add_user(self, id):
         if db.add_user(id, round(time())):
             return True
@@ -22,7 +22,7 @@ class users():
         if user is False:
             return False
         status_name = ["пользователем", "Premium пользователем"]
-        self.bot.sendMessage(id, "Ваш профиль:\n\n\
+        bot.sendMessage(id, "Ваш профиль:\n\n\
 Ваш ID: " + str(user['id']) + "\nДата регистрации: " \
         + datetime.fromtimestamp(user['reg_date']).strftime("%B %d, %Y %H:%M:%S") \
         + "\nВы являетесь " + status_name[user['status'] - 1] + "\nКоличество сообщений: " \
