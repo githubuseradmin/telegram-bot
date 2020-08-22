@@ -1,0 +1,50 @@
+CREATE TABLE "callback_query" (
+	"callback_query"	TEXT,
+	"status"	INTEGER DEFAULT 0
+);
+
+CREATE TABLE "commands" (
+	"command"	TEXT,
+	"status"	INTEGER DEFAULT 0
+);
+
+CREATE TABLE "errors" (
+	"id"	INTEGER,
+	"error_id"	INTEGER DEFAULT 0,
+	"data"	TEXT,
+	"time"	NUMERIC,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+CREATE TABLE "reports" (
+	"id"	INTEGER,
+	"user_id"	INTEGER,
+	"text"	TEXT,
+	"time"	NUMERIC,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+CREATE TABLE "settings" (
+	"status"	INTEGER DEFAULT 0,
+	"bot_name"	TEXT
+);
+
+INSERT INTO "settings" ("status", "bot_name") VALUES ('1', 'Test Bot');
+
+CREATE TABLE "statistics" (
+	"messages"	INTEGER DEFAULT 0,
+	"commands"	INTEGER DEFAULT 0,
+	"callback_query"	INTEGER DEFAULT 0
+);
+
+INSERT INTO "statistics" ("messages", "commands", "callback_query") VALUES ('8', '10', '5');
+
+CREATE TABLE "users" (
+	"id"	INTEGER,
+	"id_telegram"	INTEGER,
+	"reg_date"	NUMERIC,
+	"status"	INTEGER DEFAULT 1,
+	"block"	NUMERIC DEFAULT 0,
+	"messages_send"	INTEGER DEFAULT 0,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
