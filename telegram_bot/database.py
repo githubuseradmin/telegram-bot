@@ -1,140 +1,202 @@
-import sqlite3
+import mysql.connector
+from contextlib import contextmanager
+
+@contextmanager
+def connect():
+    try:
+        connection = mysql.connector.connect(host = connect.host,
+        user = connect.user,
+        password = connect.password,
+        database = connect.database,
+        autocommit = True)
+        cursor = connection.cursor()
+        yield cursor
+    finally:
+        connection.close()
+
+class connect_db():
+    host = None
+    user = None
+    password = None
+    database = None
+    def __init__(self, host, user, password, database):
+        try:
+            mysql.connector.connect(host = host, user = user, password = password, database = database,
+            autocommit = True)
+        except mysql.connector.Error as error:
+            print("Don't connected")
+        connect.host = host
+        connect.user = user
+        connect.password = password
+        connect.database = database
 
 class users_db():
-    def __init__(self, db):
-        self.connection = sqlite3.connect(db)
-        self.cursor = self.connection.cursor()
-    def add_user(self, id_telegram, reg_date):
-        with self.connection:
-            result = self.cursor.execute("INSERT INTO `users` (`id_telegram`, `reg_date`) VALUES (?, ?)", (id_telegram, reg_date))
-            return result.lastrowid
-    def check_user(self, id_telegram):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `users` WHERE `id_telegram` = ?", (id_telegram,)).fetchall()
-            return bool(len(result))
-    def get_user_id(self, id_telegram):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `users` WHERE `id_telegram` = ?", (id_telegram,)).fetchall()
-            if len(result) != 1:
+    def add_user(id_telegram):
+        with connect() as db:
+            db.execute("INSERT INTO `users` (`id_telegram`) VALUES (%s)", (id_telegram,))
+            return db.lastrowid
+    def check_user(id_telegram):
+        with connect() as db:
+            db.execute("SELECT * FROM `users` WHERE `id_telegram` = %s", (id_telegram,))
+            return bool(len(db.fetchall()))
+    def get_user_id(id_telegram):
+        with connect() as db:
+            db.execute("SELECT id FROM `users` WHERE `id_telegram` = %s LIMIT 1", (id_telegram,))
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
             return result[0]
-    def user(self, id_telegram):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `users` WHERE `id_telegram` = ?", (id_telegram,)).fetchall()
-            if len(result) != 1:
+    def user(id_telegram):
+        with connect() as db:
+            db.execute("SELECT id, id_telegram, reg_time, status, " + \
+            "block, actions FROM `users` WHERE `id_telegram` = %s LIMIT 1", (id_telegram,))
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
             user = {}
             user["id"] = result[0]
             user["id_telegram"] = result[1]
-            user["reg_date"] = result[2]
+            user["reg_time"] = result[2]
             user["status"] = result[3]
             user["block"] = result[4]
-            user["messages_send"] = result[5]
+            user["actions"] = result[5]
             return user
-    def messages_send_update(self, id_telegram):
-        with self.connection:
+    def actions_update(id_telegram):
+        with connect() as db:
             user = users_db.user(id_telegram)
-            messages_send = user["messages_send"] + 1
-            self.cursor.execute("UPDATE `users` SET `messages_send` = ? WHERE `id_telegram = ?`", (messages_send, id_telegram))
+            messages_send = user["actions"] + 1
+            db.execute("UPDATE `users` SET `actions` = %s WHERE `id_telegram` = %s", (messages_send, id_telegram))
+            return True
+    def delete(id_telegram):
+        with connect() as db:
+            db.execute("DELETE FROM `users` WHERE `id_telegram` = %s", (id_telegram,))
+            return True
+    def check_action(id_telegram):
+        with connect() as db:
+            db.execute("SELECT action FROM `users` WHERE `id_telegram` = %s LIMIT 1", (id_telegram,))
+            result = db.fetchone()
+            if result is None:
+                return False
+            return result[0]
+    def remove_action(id_telegram):
+        with connect() as db:
+            db.execute("UPDATE `users` SET `action` = 'None' WHERE `id_telegram` = %s", (id_telegram,))
+            return True
+    def change_action(id_telegram, action):
+        with connect() as db:
+            db.execute("UPDATE `users` SET `action` = %s WHERE `id_telegram` = %s", (action, id_telegram))
             return True
 
 class commands_db():
-    def __init__(self, db):
-        self.connection = sqlite3.connect(db)
-        self.cursor = self.connection.cursor()
-    def check_command(self, command):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `commands` WHERE command = ?", (command,)).fetchall()
-            if len(result) != 1:
+    def check_command(command):
+        with connect() as db:
+            db.execute("SELECT status FROM `commands` WHERE command = %s", (command,))
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
-            if result[1] == 0:
+            if result[0] == 0:
                 return "off"
             return True
 
 class settings_db():
-    def __init__(self, db):
-        self.connection = sqlite3.connect(db)
-        self.cursor = self.connection.cursor()
-    def check_status(self):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `settings`").fetchall()
-            if len(result) != 1:
+    def check_status():
+        with connect() as db:
+            db.execute("SELECT value FROM `settings` WHERE `name` = 'status'")
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
-            if result[0] == 0:
-                return False;
+            if int(result[0]) == 0:
+                return False
             return True
-    def get_name(self):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `settings`").fetchall()
-            if len(result) != 1:
+
+    def get_name():
+        with connect() as db:
+            db.execute("SELECT * FROM `settings` WHERE `name` = 'name'")
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
             return result[1]
 
 class errors_db():
-    def __init__(self, db):
-        self.connection = sqlite3.connect(db)
-        self.cursor = self.connection.cursor()
-    def error(self, error_id, data, time):
-        with self.connection:
-            result = self.cursor.execute("INSET INTO (`error_id`, `data`, `time`) VALUES (?, ?, ?)", (error_id, data, time))
+    def error(error_id, data, time):
+        with connect() as db:
+            result = db.execute("INSET INTO (`error_id`, `data`, `time`) VALUES (%s, %s, %s)", (error_id, data, time))
             return result.lastrowid
 
 class callback_query_db():
-    def __init__(self, db):
-        self.connection = sqlite3.connect(db)
-        self.cursor = self.connection.cursor()
-    def check_callback_query(self, callback_query):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `callback_query` WHERE callback_query = ?", (callback_query,)).fetchall()
-            if len(result) != 1:
+    def check_callback_query(callback_query):
+        with connect() as db:
+            db.execute("SELECT status FROM `callback_query` WHERE callback_query = %s", (callback_query,))
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
-            if result[1] == 0:
+            if result[0] == 0:
                 return "off"
             return True
 
 class report_db():
-    def __init__(self, db):
-        self.connection = sqlite3.connect(db)
-        self.cursor = self.connection.cursor()
-    def send(self, user_id, text, time):
-        with self.connection:
-            result = self.cursor.execute("INSERT INTO `reports` (`user_id`, `text`, `time`) VALUES (?, ?, ?)", (user_id, text, time))
-            return result.lastrowid
+    def send(user_id, text, time):
+        with connect() as db:
+            db.execute("INSERT INTO `reports` (`user_id`, `text`, `time`) VALUES (%s, %s, %s)", (user_id, text, time))
+            return db.lastrowid
+    def create_text(user_id, text):
+        with connect() as db:
+            db.execute("INSERT INTO `reports_text` (`user_id`, `report_text`) VALUES (%s, %s)", (user_id, text))
+            return db.lastrowid
+    def get_text(user_id):
+        with connect() as db:
+            db.execute("SELECT report_text FROM `reports_text` WHERE `user_id` = %s LIMIT 1", (user_id,))
+            result = db.fetchone()
+            if result is None:
+                return False
+            return result[0]
+    def delete_text(user_id):
+        with connect() as db:
+            db.execute("DELETE FROM `reports_text` WHERE `user_id` = %s", (user_id,))
+            return True
+    def check_reports(user_id):
+        with connect() as db:
+            db.execute("SELECT user_id FROM `reports` WHERE `user_id` = %s", (user_id,))
+            result = db.fetchall()
+            if result is None:
+                return 0
+            return len(result)
 
 class statistics_db():
-    def __init__(self, db):
-        self.connection = sqlite3.connect(db)
-        self.cursor = self.connection.cursor()
-    def update_messages(self):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `statistics`").fetchall()
-            if len(result) != 1:
+    def update_messages():
+        with connect() as db:
+            db.execute("SELECT messages FROM `statistics` LIMIT 1")
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
             messages = result[0] + 1
-            self.cursor.execute("UPDATE `statistics` SET messages = ?", (messages,))
+            db.execute("UPDATE `statistics` SET messages = %s", (messages,))
             return True
-    def update_commands(self):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `statistics`").fetchall()
-            if len(result) != 1:
+    def update_commands():
+        with connect() as db:
+            db.execute("SELECT commands FROM `statistics` LIMIT 1")
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
-            commands = result[1] + 1
-            self.cursor.execute("UPDATE `statistics` SET commands = ?", (commands,))
+            commands = result[0] + 1
+            db.execute("UPDATE `statistics` SET commands = %s", (commands,))
             return True
-    def update_callback_query(self):
-        with self.connection:
-            result = self.cursor.execute("SELECT * FROM `statistics`").fetchall()
-            if len(result) != 1:
+    def update_callback_query():
+        with connect() as db:
+            db.execute("SELECT callback_query FROM `statistics` LIMIT 1")
+            result = db.fetchone()
+            if result is None:
                 return False
-            result = result[0]
-            callback_query = result[2] + 1
-            self.cursor.execute("UPDATE `statistics` SET callback_query = ?", (callback_query,))
+            callback_query = result[0] + 1
+            db.execute("UPDATE `statistics` SET callback_query = %s", (callback_query,))
             return True
+
+class text_db():
+
+    def text(id, lang):
+        with connect() as db:
+            db.execute("SELECT `%s` FROM `text` WHERE id = %s LIMIT 1", (lang, id))
+            result = db.fetchone()
+            if result is None:
+                return False
+            return result[0]

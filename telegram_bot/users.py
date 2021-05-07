@@ -1,33 +1,47 @@
-from time import time, strftime
-from datetime import datetime
-from telegram_bot.database import users_db
-
-db = users_db("db/users.db")
-
-bot = telegram_bot.Bot()
+from telegram_bot import bot
+# from time import time, strftime
+# from datetime import datetime
+from telegram_bot.database import users_db as db
 
 class users():
-    def add_user(self, id):
-        if db.add_user(id, round(time())):
+    def add_user(id):
+#        if db.add_user(id, round(time())):
+        if db.add_user(id):
             return True
         return False
-    def check_user(self, id):
+    def check_user(id):
         return db.check_user(id)
-    def get_user_id(self, id):
+    def get_user_id(id):
         return db.get_user_id(id)
-    def get_user(self, id):
+    def get_user(id):
         return db.get_user(id)
-    def profile(self, id):
+    def profile(id):
         user = db.user(id)
         if user is False:
             return False
         status_name = ["пользователем", "Premium пользователем"]
-        bot.sendMessage(id, "Ваш профиль:\n\n\
-Ваш ID: " + str(user['id']) + "\nДата регистрации: " \
-        + datetime.fromtimestamp(user['reg_date']).strftime("%B %d, %Y %H:%M:%S") \
+        bot.sendMessage(id, "Ваш профиль:\n\n" + \
+        "Ваш ID: " + str(user['id']) + "\nДата регистрации: " \
+        + str(user['reg_time']) \
         + "\nВы являетесь " + status_name[user['status'] - 1] + "\nКоличество сообщений: " \
-        + str(user['messages_send']))
+        + str(user['actions']))
         return True
-    def messages_send_update(self, id):
+    def get_profile(id):
+        user = db.user(id)
+        if user is False:
+            return False
+        return user
+    def actions_update(id):
         if users.check_user(id):
-            return db.messages_send_update(id)
+            return db.actions_update(id)
+    def delete(id):
+        return db.delete(id)
+    def check_action(id):
+        action = db.check_action(id)
+        if action == "None":
+            return False
+        return action
+    def remove_action(id):
+        return db.remove_action(id)
+    def change_action(id, action):
+        return db.change_action(id, action)

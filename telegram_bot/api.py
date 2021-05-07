@@ -4,19 +4,16 @@ import json
 def main():
     pass
 
-class Bot():
-    token = None
+class bot():
+    request_url = None
     def __init__(self, token = None, url = None):
-        if Bot.token is None:
+        if bot.request_url is None:
+            if url is None:
+                url = "https://api.telegram.org/bot"
             if token:
-                Bot.token = token
-        if url is None:
-            self.url = "https://api.telegram.org/bot"
-        else:
-            self.url = url
-        self.request_url = self.url + Bot.token
+                bot.request_url = url + token
 
-    def getUpdates(self, offset = None, timeout = None):
+    def getUpdates(offset = None, timeout = None):
         """
         getUpdates
 
@@ -37,13 +34,14 @@ class Bot():
             data['offset'] = offset
         if timeout:
             data['timeout'] = timeout
-        request = requests.post(f'{self.request_url}/getUpdates', data = data)
+        request = requests.post(f'{bot.request_url}/getUpdates', data = data)
         request_json = request.json()
         if request_json['ok'] == False:
             print("Not ok")
             print("[ERROR 1] Telgram API return 'ok': False")
             result = {}
             result["error"] = 1
+            result["result"] = False
             return result
         if request_json['result']:
             result = {}
@@ -103,7 +101,7 @@ class Bot():
             result['result'] = False
             result['update_id'] = offset
             return result
-    def sendMessage(self, id, text, reply_markup = None, parse_mode = None, disable_web_page_preview = None, \
+    def sendMessage(id, text, reply_markup = None, parse_mode = None, disable_web_page_preview = None, \
     disable_notification = None, reply_to_message_id = None):
         """
         sendMessage
@@ -129,11 +127,11 @@ class Bot():
             data['disable_notification'] = disable_notification
         if reply_to_message_id:
             data['reply_to_message_id'] = reply_to_message_id
-        send = requests.post(f'{self.request_url}/sendMessage', data = data)
+        send = requests.post(f'{bot.request_url}/sendMessage', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
-    def answerCallbackQuery(self, id, text = None, show_alert = None, url = None, cache_time = None):
+    def answerCallbackQuery(id, text = None, show_alert = None, url = None, cache_time = None):
         """
         answerCallbackQuery
 
@@ -153,7 +151,7 @@ class Bot():
             data['url'] = url
         if cache_time:
             data['cache_time'] = cache_time
-        send = requests.post(f'{self.request_url}/answerCallbackQuery', data = data)
+        send = requests.post(f'{bot.request_url}/answerCallbackQuery', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
@@ -181,7 +179,7 @@ class Bot():
 #        """
 #        result = buttons
 #        return result
-    def InlineKeyboard(self, buttons):
+    def InlineKeyboard(buttons):
         """
         InlineKeyboardButton
 
@@ -204,7 +202,7 @@ class Bot():
             result.append(result_buttons)
         return {"inline_keyboard": result}
 #    def ReplyKeyboardMarkup(self, buttons, resize_keyboard = False, one_time_keyboard = False, selective = False):
-    def ReplyKeyboard(self, buttons, resize_keyboard = False, one_time_keyboard = False, selective = False):
+    def ReplyKeyboard(buttons, resize_keyboard = False, one_time_keyboard = False, selective = False):
 #        """
 #        ReplyKeyboardMarkup
 #
@@ -242,7 +240,7 @@ class Bot():
 #        """
 #        result = buttons
 #        return result
-    def ReplyKeyboardRemove(self, selective = None):
+    def ReplyKeyboardRemove(selective = None):
         """
         ReplyKeyboardRemove
 
@@ -258,7 +256,7 @@ class Bot():
             result['selective'] = selective
 #        result = {'remove_keyboard': True}
         return result
-    def sendSticker(self, id, sticker, reply_markup = None, disable_notification = None, reply_to_message_id = None):
+    def sendSticker(id, sticker, reply_markup = None, disable_notification = None, reply_to_message_id = None):
         """
         sendSticker
 
@@ -279,11 +277,11 @@ class Bot():
             data['disable_notification'] = disable_notification
         if reply_to_message_id:
             data['reply_to_message_id'] = reply_to_message_id
-        send = requests.post(f'{self.request_url}/sendSticker', data = data)
+        send = requests.post(f'{bot.request_url}/sendSticker', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
-    def editMessageText(self, text, id = None, message_id = None, reply_markup = None, inline_message_id = None, \
+    def editMessageText(text, id = None, message_id = None, reply_markup = None, inline_message_id = None, \
     parse_mode = None, disable_web_page_preview = None):
         """
         editMessageText
@@ -310,11 +308,11 @@ class Bot():
             data['parse_mode'] = parse_mode
         if disable_web_page_preview:
             data['disable_web_page_preview'] = disable_web_page_preview
-        send = requests.post(f'{self.request_url}/editMessageText', data = data)
+        send = requests.post(f'{bot.request_url}/editMessageText', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
-    def editMessageReplyMarkup(self, reply_markup, id = None, message_id = None, inline_message_id = None):
+    def editMessageReplyMarkup(reply_markup, id = None, message_id = None, inline_message_id = None):
         """
         editMessageText
 
@@ -333,7 +331,7 @@ class Bot():
         elif inline_message_id:
             data['inline_message_id'] = inline_message_id
         data['reply_markup'] = json.dumps(reply_markup)
-        send = requests.post(f'{self.request_url}/editMessageReplyMarkup', data = data)
+        send = requests.post(f'{bot.request_url}/editMessageReplyMarkup', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
