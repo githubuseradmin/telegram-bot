@@ -1,4 +1,4 @@
-from telegram_bot import bot, users, settings, report, statistics
+from telegram_bot import users, settings, report, statistics
 from telegram_bot.database import callback_query_db as db
 
 class callback_query():
@@ -93,7 +93,3 @@ class callback_query():
             report.send(chat_id, text)
             report.delete_text(chat_id)
             return True
-
-    def test(chat_id):
-        bot.sendMessage(id = chat_id, text = "TEST")
-        return True

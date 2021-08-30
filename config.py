@@ -1,0 +1,5 @@
+TOKEN = "1124104867:AAHHe3f4Lxs8biGFTwtb16BXeE29rM6x_aU"
+DB_HOST = "localhost"
+DB_USER = "root"
+DB_PASSWORD = "12345"
+DB_DATABASE = "test"

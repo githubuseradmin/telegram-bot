@@ -5,15 +5,17 @@ def main():
     pass
 
 class bot():
-    request_url = None
-    def __init__(self, token = None, url = None):
-        if bot.request_url is None:
-            if url is None:
-                url = "https://api.telegram.org/bot"
-            if token:
-                bot.request_url = url + token
 
-    def getUpdates(offset = None, timeout = None):
+    def __init__(self, token = None, url = None):
+        if url is None:
+            self.url = "https://api.telegram.org/bot"
+        else:
+            self.url = url
+
+        if token:
+            self.request_url = self.url + token
+
+    def getUpdates(self, offset = None, timeout = None):
         """
         getUpdates
 
@@ -34,7 +36,7 @@ class bot():
             data['offset'] = offset
         if timeout:
             data['timeout'] = timeout
-        request = requests.post(f'{bot.request_url}/getUpdates', data = data)
+        request = requests.post(f'{self.request_url}/getUpdates', data = data)
         request_json = request.json()
         if request_json['ok'] == False:
             print("Not ok")
@@ -101,7 +103,7 @@ class bot():
             result['result'] = False
             result['update_id'] = offset
             return result
-    def sendMessage(id, text, reply_markup = None, parse_mode = None, disable_web_page_preview = None, \
+    def sendMessage(self, id, text, reply_markup = None, parse_mode = None, disable_web_page_preview = None, \
     disable_notification = None, reply_to_message_id = None):
         """
         sendMessage
@@ -127,11 +129,11 @@ class bot():
             data['disable_notification'] = disable_notification
         if reply_to_message_id:
             data['reply_to_message_id'] = reply_to_message_id
-        send = requests.post(f'{bot.request_url}/sendMessage', data = data)
+        send = requests.post(f'{self.request_url}/sendMessage', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
-    def answerCallbackQuery(id, text = None, show_alert = None, url = None, cache_time = None):
+    def answerCallbackQuery(self, id, text = None, show_alert = None, url = None, cache_time = None):
         """
         answerCallbackQuery
 
@@ -151,7 +153,7 @@ class bot():
             data['url'] = url
         if cache_time:
             data['cache_time'] = cache_time
-        send = requests.post(f'{bot.request_url}/answerCallbackQuery', data = data)
+        send = requests.post(f'{self.request_url}/answerCallbackQuery', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
@@ -179,7 +181,7 @@ class bot():
 #        """
 #        result = buttons
 #        return result
-    def InlineKeyboard(buttons):
+    def InlineKeyboard(self, buttons):
         """
         InlineKeyboardButton
 
@@ -202,7 +204,7 @@ class bot():
             result.append(result_buttons)
         return {"inline_keyboard": result}
 #    def ReplyKeyboardMarkup(self, buttons, resize_keyboard = False, one_time_keyboard = False, selective = False):
-    def ReplyKeyboard(buttons, resize_keyboard = False, one_time_keyboard = False, selective = False):
+    def ReplyKeyboard(self, buttons, resize_keyboard = False, one_time_keyboard = False, selective = False):
 #        """
 #        ReplyKeyboardMarkup
 #
@@ -240,7 +242,7 @@ class bot():
 #        """
 #        result = buttons
 #        return result
-    def ReplyKeyboardRemove(selective = None):
+    def ReplyKeyboardRemove(self, selective = None):
         """
         ReplyKeyboardRemove
 
@@ -256,7 +258,7 @@ class bot():
             result['selective'] = selective
 #        result = {'remove_keyboard': True}
         return result
-    def sendSticker(id, sticker, reply_markup = None, disable_notification = None, reply_to_message_id = None):
+    def sendSticker(self, id, sticker, reply_markup = None, disable_notification = None, reply_to_message_id = None):
         """
         sendSticker
 
@@ -277,11 +279,11 @@ class bot():
             data['disable_notification'] = disable_notification
         if reply_to_message_id:
             data['reply_to_message_id'] = reply_to_message_id
-        send = requests.post(f'{bot.request_url}/sendSticker', data = data)
+        send = requests.post(f'{self.request_url}/sendSticker', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
-    def editMessageText(text, id = None, message_id = None, reply_markup = None, inline_message_id = None, \
+    def editMessageText(self, text, id = None, message_id = None, reply_markup = None, inline_message_id = None, \
     parse_mode = None, disable_web_page_preview = None):
         """
         editMessageText
@@ -308,11 +310,11 @@ class bot():
             data['parse_mode'] = parse_mode
         if disable_web_page_preview:
             data['disable_web_page_preview'] = disable_web_page_preview
-        send = requests.post(f'{bot.request_url}/editMessageText', data = data)
+        send = requests.post(f'{self.request_url}/editMessageText', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result
-    def editMessageReplyMarkup(reply_markup, id = None, message_id = None, inline_message_id = None):
+    def editMessageReplyMarkup(self, reply_markup, id = None, message_id = None, inline_message_id = None):
         """
         editMessageText
 
@@ -331,7 +333,7 @@ class bot():
         elif inline_message_id:
             data['inline_message_id'] = inline_message_id
         data['reply_markup'] = json.dumps(reply_markup)
-        send = requests.post(f'{bot.request_url}/editMessageReplyMarkup', data = data)
+        send = requests.post(f'{self.request_url}/editMessageReplyMarkup', data = data)
         send_json = send.json()
         result = send_json['ok']
         return result

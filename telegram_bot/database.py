@@ -3,6 +3,12 @@ from contextlib import contextmanager
 
 @contextmanager
 def connect():
+
+    host = None
+    user = None
+    password = None
+    database = None
+
     try:
         connection = mysql.connector.connect(host = connect.host,
         user = connect.user,
@@ -15,10 +21,6 @@ def connect():
         connection.close()
 
 class connect_db():
-    host = None
-    user = None
-    password = None
-    database = None
     def __init__(self, host, user, password, database):
         try:
             mysql.connector.connect(host = host, user = user, password = password, database = database,

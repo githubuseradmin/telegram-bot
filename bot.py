@@ -1,7 +1,9 @@
-from telegram_bot import bot, users, commands, settings, errors, callback_query, statistics, actions
+from config import *
+from api import *
+from telegram_bot import *
 from telegram_bot.database import connect_db
 
-bot("1124104867:AAHHe3f4Lxs8biGFTwtb16BXeE29rM6x_aU")
+bot = api.bot("1124104867:AAHHe3f4Lxs8biGFTwtb16BXeE29rM6x_aU")
 
 connect_db("127.0.0.1", "root", "12345", "test")
 
